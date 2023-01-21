@@ -1,11 +1,7 @@
 package ru.yandex.practicum.filmorate;
 
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.SpringApplication;
 import org.springframework.boot.test.context.SpringBootTest;
 import ru.yandex.practicum.filmorate.controller.FilmController;
 import ru.yandex.practicum.filmorate.controller.UserController;
@@ -13,18 +9,7 @@ import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 
-import java.io.IOException;
-import java.lang.reflect.Type;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashSet;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @SpringBootTest
 class ValidationTest {
@@ -99,9 +84,8 @@ class ValidationTest {
     void filmControllerDescriptionMore200() {
         film = Film.builder()
                 .releaseDate(LocalDate.of(2020, 10, 10))
-                .description("Блокбастерdasdasdas[pdkasl;[kdkasl;dk;l'askdkasopiuwoujaoidhjsjdaklsdjakls" +
-                        "jdlkjalskjdlkjasl;jdjlaksjdlkalskjdjlkajskl;djawo0ijudskloja" +
-                        "kldjaskldjlaks;jlk;jacklv;kl;amwoiqhuyduihasjdnaslk.dnawoihpdhsakldhklsa")
+                .description("                      OVER 200                                               OVER 200                         "+
+                        "                      OVER 200                                               OVER 200                         ")
                 .duration(100)
                 .id(1)
                 .name("Форсаж 100").build();
