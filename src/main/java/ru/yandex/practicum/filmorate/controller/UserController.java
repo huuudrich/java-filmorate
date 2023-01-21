@@ -51,15 +51,18 @@ public class UserController {
     }
 
     private User validateUser(User user) throws ValidationException {
+        String emailFail = "Емейл пустой или не содержит @";
+        String loginFail = "Логин содержит пробелы или пустой";
+        String birthdayFail = "Дата рождения указана в будущем";
         if (user.getEmail().isBlank() || !user.getEmail().contains("@")) {
-            log.warn("Емейл пустой или не содержит @");
-            throw new ValidationException("Емейл пустой или не содержит @");
+            log.warn(emailFail);
+            throw new ValidationException(emailFail);
         } else if (user.getLogin().isBlank() || user.getLogin().contains(" ")) {
-            log.warn("Логин содержит пробелы или пустой");
-            throw new ValidationException("Логин содержит пробелы или пустой");
+            log.warn(loginFail);
+            throw new ValidationException(loginFail);
         } else if (user.getBirthday().isAfter(LocalDate.now())) {
-            log.warn("Дата рождения указана в будущем");
-            throw new ValidationException("Дата рождения указана в будущем");
+            log.warn(birthdayFail);
+            throw new ValidationException(birthdayFail);
         } else {
             return user;
         }

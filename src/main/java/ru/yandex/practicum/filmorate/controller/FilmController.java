@@ -44,19 +44,23 @@ public class FilmController {
     }
 
     private Film validateFilms(Film film) throws ValidationException {
+        String emptyName = "Передано пустое имя фильма";
+        String descriptionOver200 = "Описание фильма превышает 200 символов";
+        String dateOverBirthday = "Дата релиза раньше чем рождение кино";
+        String negativeDuration = "Отрицательная продолжительность фильма";
         final LocalDate birthdayFilms = LocalDate.of(1895, 12, 28);
         if (film.getName().isBlank()) {
-            log.warn("Передано пустое имя фильма");
-            throw new ValidationException("Передано пустое имя фильма");
+            log.warn(emptyName);
+            throw new ValidationException(emptyName);
         } else if (film.getDescription().length() > 200) {
-            log.warn("Описание фильма превышает 200 символов");
-            throw new ValidationException("Описание фильма превышает 200 символов");
+            log.warn(descriptionOver200);
+            throw new ValidationException(descriptionOver200);
         } else if (birthdayFilms.isAfter(film.getReleaseDate())) {
-            log.warn("Дата релиза раньше чем рождение кино");
-            throw new ValidationException("Дата релиза раньше чем рождение кино");
+            log.warn(dateOverBirthday);
+            throw new ValidationException(dateOverBirthday);
         } else if (film.getDuration() < 0) {
-            log.warn("Отрицательная продолжительность фильма");
-            throw new ValidationException("Отрицательная продолжительность фильма");
+            log.warn(negativeDuration);
+            throw new ValidationException(negativeDuration);
         } else {
             return film;
         }
