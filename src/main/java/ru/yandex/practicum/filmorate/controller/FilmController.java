@@ -1,68 +1,87 @@
 package ru.yandex.practicum.filmorate.controller;
 
+import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.service.FilmService;
+import ru.yandex.practicum.filmorate.storage.InMemoryFilmStorage;
 
-import java.time.LocalDate;
-import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.List;
 
 @RestController
 @Slf4j
 @RequestMapping("/films")
 public class FilmController {
-    HashSet<Film> films = new HashSet<>();
 
+    InMemoryFilmStorage inMemoryFilmStorage = new InMemoryFilmStorage();
+    FilmService filmService = new FilmService(inMemoryFilmStorage);
+
+    @Validated
     @PostMapping
-    public Film addFilm(@Valid @RequestBody Film film) throws ValidationException {
-        film.setId(film.getId() + 1);
-        films.add(validateFilms(film));
-        log.info("Добавлен новый фильм: " + film);
-        return film;
+    public Film addFilm(@Valid @RequestBody Film film) throws NotFoundException {
+        return inMemoryFilmStorage.addFilm(film);
     }
 
+    @Validated
     @PutMapping
-    public Film refreshFilm(@Valid @RequestBody Film film) throws ValidationException {
-        for (Film f : films) {
-            if (f.getId() == film.getId()) {
-                log.info("Фильм обновлен: " + film);
-                films.add(validateFilms(film));
-            } else {
-                log.warn("Неправильный id фильма");
-                throw new ValidationException("Неправильный id фильма");
-            }
-        }
-        return film;
+    public Film refreshFilm(@Valid @RequestBody Film film) throws NotFoundException {
+        return inMemoryFilmStorage.refreshFilm(film);
     }
 
+    @Validated
     @GetMapping
-    public HashSet<Film> getAllFilms() {
-        log.info("Получен список фильмов: " + films);
-        return films;
+    public List<Film> getAllFilms() {
+        return new ArrayList<>(inMemoryFilmStorage.getAllFilms().values());
     }
 
-    private Film validateFilms(Film film) throws ValidationException {
-        String emptyName = "Передано пустое имя фильма";
-        String descriptionOver200 = "Описание фильма превышает 200 символов";
-        String dateOverBirthday = "Дата релиза раньше чем рождение кино";
-        String negativeDuration = "Отрицательная продолжительность фильма";
-        final LocalDate birthdayFilms = LocalDate.of(1895, 12, 28);
-        if (film.getName().isBlank()) {
-            log.warn(emptyName);
-            throw new ValidationException(emptyName);
-        } else if (film.getDescription().length() > 200) {
-            log.warn(descriptionOver200);
-            throw new ValidationException(descriptionOver200);
-        } else if (birthdayFilms.isAfter(film.getReleaseDate())) {
-            log.warn(dateOverBirthday);
-            throw new ValidationException(dateOverBirthday);
-        } else if (film.getDuration() < 0) {
-            log.warn(negativeDuration);
-            throw new ValidationException(negativeDuration);
-        } else {
-            return film;
-        }
+    @PutMapping("{id}/like/{userId}")
+    public void putLike(@PathVariable Integer id, @PathVariable Integer userId) {
+        filmService.putLike(id, userId);
+    }
+
+    @DeleteMapping("{id}/like/{userId}")
+    public void removeLike(@PathVariable Integer id, @PathVariable Integer userId) {
+        filmService.removeLike(id, userId);
+    }
+
+    @GetMapping("popular")
+    public List<Film> getListSortLikes(@RequestParam(defaultValue = "0") Integer count) {
+        return filmService.getListSortLikes(count).toList();
+    }
+
+    @GetMapping("{id}")
+    public Film getFilm(@PathVariable Integer id) throws NotFoundException {
+        if (inMemoryFilmStorage.getAllFilms().size() < id)
+            throw new NotFoundException("id превышает количество фильмов");
+        return filmService.getFilm(id);
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ResponseEntity<String> handleConstraintViolationException(ConstraintViolationException e) {
+        return new ResponseEntity<>("Ошибка валидации: " +
+                e.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ResponseEntity<String> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
+        return new ResponseEntity<>("Ошибка валидации: " +
+                e.getFieldError().getDefaultMessage(), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(NotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ResponseEntity<String> handleValidationException(NotFoundException e) {
+        return new ResponseEntity<>("NotFound Exception: " +
+                e.getMessage(), HttpStatus.BAD_REQUEST);
     }
 }
