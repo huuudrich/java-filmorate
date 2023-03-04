@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.controller;
 
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -43,22 +44,24 @@ public class FilmController {
     }
 
     @PutMapping("{id}/like/{userId}")
-    public void putLike(@PathVariable Integer id, @PathVariable Integer userId) {
+    public void putLike(@PathVariable("id") @Positive Integer id,
+                        @PathVariable("userId") @Positive Integer userId) {
         filmService.putLike(id, userId);
     }
 
     @DeleteMapping("{id}/like/{userId}")
-    public void removeLike(@PathVariable Integer id, @PathVariable Integer userId) {
+    public void removeLike(@PathVariable("id") @Positive Integer id,
+                           @PathVariable("userId") @Positive Integer userId) {
         filmService.removeLike(id, userId);
     }
 
     @GetMapping("popular")
-    public List<Film> getListSortLikes(@RequestParam(defaultValue = "0") Integer count) {
+    public List<Film> getListSortLikes(@RequestParam(defaultValue = "0") @Positive Integer count) {
         return filmService.getListSortLikes(count).toList();
     }
 
     @GetMapping("{id}")
-    public Film getFilm(@PathVariable Integer id) throws NotFoundException {
+    public Film getFilm(@PathVariable("id") @Positive Integer id) throws NotFoundException {
         if (inMemoryFilmStorage.getAllFilms().size() < id)
             throw new NotFoundException("id превышает количество фильмов");
         return filmService.getFilm(id);
