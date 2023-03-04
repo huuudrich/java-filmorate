@@ -5,6 +5,8 @@ import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 import ru.yandex.practicum.filmorate.annotation.DateOverBirthday;
+import ru.yandex.practicum.filmorate.model.properties.Genre;
+import ru.yandex.practicum.filmorate.model.properties.RatingMpa;
 
 import java.time.LocalDate;
 import java.util.HashSet;
@@ -24,6 +26,8 @@ public class Film {
     @Positive(message = "Отрицательное значение продолжительности")
     private Integer duration;
     private Set<Integer> likes;
+    private Set<Genre> genres;
+    private Set<RatingMpa> mpa;
 
     public Film(Integer id, String name, String description, LocalDate releaseDate, Integer duration) {
         this.id = id;
