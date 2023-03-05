@@ -7,7 +7,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 
 import java.util.HashMap;
 
-interface FilmStorage {
+public interface FilmStorage {
     Film addFilm(@Valid @RequestBody Film film) throws NotFoundException;
 
     Film refreshFilm(@Valid @RequestBody Film film) throws NotFoundException;

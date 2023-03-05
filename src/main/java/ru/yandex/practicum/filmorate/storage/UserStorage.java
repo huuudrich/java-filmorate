@@ -7,7 +7,7 @@ import ru.yandex.practicum.filmorate.model.User;
 
 import java.util.HashMap;
 
-interface UserStorage {
+public interface UserStorage {
     User addUser(@Valid @RequestBody User user) throws NotFoundException;
     User refreshUser(@Valid @RequestBody User user) throws NotFoundException;
     HashMap<Integer, User> getAllUsers();

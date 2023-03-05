@@ -8,12 +8,15 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import ru.yandex.practicum.filmorate.configuration.DatabaseConfig;
+import ru.yandex.practicum.filmorate.dao.UserDao;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.service.UserService;
 import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
 
+import javax.sql.DataSource;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,19 +28,24 @@ public class UserController {
     InMemoryUserStorage inMemoryUserStorage = new InMemoryUserStorage();
     UserService userService = new UserService(inMemoryUserStorage);
 
+    UserDao userDao = new UserDao();
+
     @PostMapping
     public User addUser(@Valid @RequestBody User user) throws NotFoundException {
+        userDao.addUser(user);
         return inMemoryUserStorage.addUser(user);
     }
 
     @PutMapping
     public User refreshUser(@Valid @RequestBody User user) throws NotFoundException {
+        userDao.refreshUser(user);
         return inMemoryUserStorage.refreshUser(user);
     }
 
     @Validated
     @GetMapping
     public List<User> getAllUsers() {
+        userDao.getAllUsers();
         return new ArrayList<>(inMemoryUserStorage.getAllUsers().values());
     }
 
