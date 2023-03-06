@@ -8,15 +8,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import ru.yandex.practicum.filmorate.configuration.DatabaseConfig;
-import ru.yandex.practicum.filmorate.dao.UserDao;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.service.UserService;
-import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
 
-import javax.sql.DataSource;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,28 +21,25 @@ import java.util.List;
 @RequestMapping("/users")
 @Validated
 public class UserController {
-    InMemoryUserStorage inMemoryUserStorage = new InMemoryUserStorage();
-    UserService userService = new UserService(inMemoryUserStorage);
+    UserService userService;
 
-    UserDao userDao = new UserDao();
-
+    public UserController(UserService userService) {
+        this.userService = userService;
+    }
     @PostMapping
     public User addUser(@Valid @RequestBody User user) throws NotFoundException {
-        userDao.addUser(user);
-        return inMemoryUserStorage.addUser(user);
+        return userService.addUser(user);
     }
 
     @PutMapping
     public User refreshUser(@Valid @RequestBody User user) throws NotFoundException {
-        userDao.refreshUser(user);
-        return inMemoryUserStorage.refreshUser(user);
+        return userService.refreshUser(user);
     }
 
     @Validated
     @GetMapping
     public List<User> getAllUsers() {
-        userDao.getAllUsers();
-        return new ArrayList<>(inMemoryUserStorage.getAllUsers().values());
+        return new ArrayList<>(userService.getAllUsers().values());
     }
 
     @Validated
@@ -79,7 +72,7 @@ public class UserController {
     @Validated
     @GetMapping("{id}")
     public User getUser(@PathVariable("id") @Positive Integer id) throws NotFoundException {
-        if (inMemoryUserStorage.getAllUsers().size() < id)
+        if (userService.getAllUsers().size() < id)
             throw new NotFoundException("Id превышает количество пользователей");
         return userService.getUser(id);
     }

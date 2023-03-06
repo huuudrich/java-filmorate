@@ -9,6 +9,18 @@ import java.util.HashMap;
 
 public interface UserStorage {
     User addUser(@Valid @RequestBody User user) throws NotFoundException;
+
     User refreshUser(@Valid @RequestBody User user) throws NotFoundException;
+
     HashMap<Integer, User> getAllUsers();
+
+    void addFriends(Integer id, Integer friendId);
+
+    void removeFriends(Integer id, Integer friendId);
+
+    List<User> getListOfFriends(Integer id);
+
+    List<User> getListOfCommonFriends(Integer id, Integer otherId);
+
+    User getUser(Integer id);
 }

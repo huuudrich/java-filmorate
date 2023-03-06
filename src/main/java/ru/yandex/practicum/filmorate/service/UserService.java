@@ -1,13 +1,17 @@
 package ru.yandex.practicum.filmorate.service;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import org.springframework.validation.annotation.Validated;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
+import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 
@@ -16,9 +20,22 @@ import java.util.Set;
 @Validated
 public class UserService {
     InMemoryUserStorage inMemoryUserStorage;
+    UserStorage userDao;
 
-    public UserService(InMemoryUserStorage inMemoryUserStorage) {
-        this.inMemoryUserStorage = inMemoryUserStorage;
+    public UserService(@Qualifier("userDbStorage") UserStorage userDao) {
+        this.userDao = userDao;
+    }
+
+    public User addUser(User user) throws NotFoundException {
+        return userDao.addUser(user);
+    }
+
+    public User refreshUser(User user) throws NotFoundException {
+        return userDao.refreshUser(user);
+    }
+
+    public HashMap<Integer, User> getAllUsers() {
+        return userDao.getAllUsers();
     }
 
     public void addFriends(Integer id, Integer friendId) {

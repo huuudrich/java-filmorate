@@ -7,6 +7,18 @@ CREATE TABLE IF NOT EXISTS Users
     birthday DATE
 );
 
+CREATE TABLE IF NOT EXISTS Mpaa
+(
+    id   INTEGER PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(255) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS Genres
+(
+    id   INTEGER PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(255) NOT NULL
+);
+
 CREATE TABLE IF NOT EXISTS Films
 (
     id           INTEGER PRIMARY KEY AUTO_INCREMENT,
@@ -17,33 +29,6 @@ CREATE TABLE IF NOT EXISTS Films
     mpa_rating   INTEGER,
     FOREIGN KEY (mpa_rating) REFERENCES Mpaa (id)
 );
-
-CREATE TABLE IF NOT EXISTS Mpaa
-(
-    id   INTEGER PRIMARY KEY AUTO_INCREMENT,
-    name VARCHAR(255) NOT NULL
-);
-
-INSERT INTO Mpaa (name)
-VALUES ('G'),
-       ('PG'),
-       ('PG-13'),
-       ('R'),
-       ('NC-17');
-
-CREATE TABLE IF NOT EXISTS Genres
-(
-    id   INTEGER PRIMARY KEY AUTO_INCREMENT,
-    name VARCHAR(255) NOT NULL
-);
-
-INSERT INTO Genres (name)
-VALUES ('Комедия'),
-       ('Драма'),
-       ('Мультфильм'),
-       ('Триллер'),
-       ('Документальный'),
-       ('Боевик');
 
 CREATE TABLE IF NOT EXISTS Film_Genre
 (
