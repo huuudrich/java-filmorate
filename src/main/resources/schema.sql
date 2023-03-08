@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS Users
     birthday DATE
 );
 
-CREATE TABLE IF NOT EXISTS Mpaa
+CREATE TABLE IF NOT EXISTS Mpa
 (
     id   INTEGER PRIMARY KEY AUTO_INCREMENT,
     name VARCHAR(255) NOT NULL
@@ -26,8 +26,16 @@ CREATE TABLE IF NOT EXISTS Films
     description  VARCHAR(255) NOT NULL,
     release_date DATE         NOT NULL,
     duration     INTEGER      NOT NULL,
-    mpa_rating   INTEGER,
-    FOREIGN KEY (mpa_rating) REFERENCES Mpaa (id)
+    likes        INTEGER DEFAULT 0
+);
+
+CREATE TABLE IF NOT EXISTS Film_Mpa
+(
+    film_id  INTEGER NOT NULL,
+    mpa_id INTEGER NOT NULL,
+    PRIMARY KEY (film_id, mpa_id),
+    FOREIGN KEY (film_id) REFERENCES Films (id),
+    FOREIGN KEY (mpa_id) REFERENCES Mpa (id)
 );
 
 CREATE TABLE IF NOT EXISTS Film_Genre

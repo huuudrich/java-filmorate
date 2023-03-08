@@ -45,14 +45,14 @@ public class UserController {
     @Validated
     @PutMapping("{id}/friends/{friendId}")
     public void addFriends(@PathVariable("id") @Positive int id,
-                           @PathVariable("friendId") @Positive int friendId) {
+                           @PathVariable("friendId") @Positive int friendId) throws NotFoundException {
         userService.addFriends(id, friendId);
     }
 
     @Validated
     @DeleteMapping("{id}/friends/{friendId}")
     public void removeFriends(@PathVariable @Positive int id,
-                              @PathVariable @Positive int friendId) {
+                              @PathVariable @Positive int friendId) throws NotFoundException {
         userService.removeFriends(id, friendId);
     }
 

@@ -1,40 +1,62 @@
 package ru.yandex.practicum.filmorate.service;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.dao.GenreDao;
+import ru.yandex.practicum.filmorate.dao.MpaDao;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.storage.InMemoryFilmStorage;
+import ru.yandex.practicum.filmorate.model.properties.Genre;
+import ru.yandex.practicum.filmorate.model.properties.MpaRating;
+import ru.yandex.practicum.filmorate.storage.FilmStorage;
 
-import java.util.ArrayList;
-import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
-import java.util.stream.Stream;
 
 @Service
 @Slf4j
-public class FilmService {
-    InMemoryFilmStorage inMemoryFilmStorage;
+public class FilmService implements FilmStorage {
 
-    public FilmService(InMemoryFilmStorage inMemoryFilmStorage) {
-        this.inMemoryFilmStorage = inMemoryFilmStorage;
+    private final FilmStorage filmDao;
+
+    public FilmService(@Qualifier("filmDbStorage") FilmStorage filmDao) {
+        this.filmDao = filmDao;
     }
 
-    public void putLike(Integer id, Integer userId) {
-        getFilm(id).getLikes().add(userId);
+
+    @Override
+    public Film addFilm(Film film) throws NotFoundException {
+        return filmDao.addFilm(film);
     }
 
-    public void removeLike(Integer id, Integer userId) {
-        getFilm(id).getLikes().remove(userId);
+    @Override
+    public Film refreshFilm(Film film) throws NotFoundException {
+        return filmDao.refreshFilm(film);
     }
 
-    public Stream<Film> getListSortLikes(Integer count) {
-        List<Film> sorted = new ArrayList<>(inMemoryFilmStorage.getAllFilms().values());
-        return sorted.stream()
-                .sorted(Comparator.comparingInt(o -> ((Film) o).getLikes().size()).reversed())
-                .limit(count == 0 ? 10 : count);
+    @Override
+    public HashMap<Integer, Film> getAllFilms() {
+        return filmDao.getAllFilms();
     }
 
-    public Film getFilm(Integer id) {
-        return inMemoryFilmStorage.getAllFilms().get(id);
+    @Override
+    public void putLike(Integer id, Integer userId) throws NotFoundException {
+        filmDao.putLike(id, userId);
+    }
+
+    @Override
+    public void removeLike(Integer id, Integer userId) throws NotFoundException {
+        filmDao.removeLike(id, userId);
+    }
+
+    @Override
+    public List<Film> getListSortLikes(Integer count) {
+        return filmDao.getListSortLikes(count);
+    }
+
+    @Override
+    public Film getFilm(Integer id) throws NotFoundException {
+        return filmDao.getFilm(id);
     }
 }

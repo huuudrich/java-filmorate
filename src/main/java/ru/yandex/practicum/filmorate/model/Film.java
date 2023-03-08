@@ -6,12 +6,10 @@ import jakarta.validation.constraints.Size;
 import lombok.*;
 import ru.yandex.practicum.filmorate.annotation.DateOverBirthday;
 import ru.yandex.practicum.filmorate.model.properties.Genre;
-import ru.yandex.practicum.filmorate.model.properties.RatingMpa;
+import ru.yandex.practicum.filmorate.model.properties.MpaRating;
 
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.Set;
-
+import java.util.List;
 
 @Data
 public class Film {
@@ -25,16 +23,20 @@ public class Film {
     private LocalDate releaseDate;
     @Positive(message = "Отрицательное значение продолжительности")
     private Integer duration;
-    private Set<Integer> likes;
-    private Set<Genre> genres;
-    private Set<RatingMpa> mpa;
+    private Integer likes;
+    private List<Genre> genre;
+    private MpaRating mpa;
 
-    public Film(Integer id, String name, String description, LocalDate releaseDate, Integer duration) {
-        this.id = id;
+    public Film() {
+    }
+
+    public Film(String name, String description, LocalDate releaseDate, Integer duration, Integer likes, List<Genre> genre, MpaRating mpa) {
         this.name = name;
         this.description = description;
         this.releaseDate = releaseDate;
         this.duration = duration;
-        this.likes = new HashSet<>();
+        this.likes = likes;
+        this.genre = genre;
+        this.mpa = mpa;
     }
 }

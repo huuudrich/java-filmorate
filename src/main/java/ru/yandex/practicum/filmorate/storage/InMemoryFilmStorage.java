@@ -6,6 +6,7 @@ import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.util.HashMap;
+import java.util.List;
 
 @Repository
 @Slf4j
@@ -36,5 +37,44 @@ public class InMemoryFilmStorage implements FilmStorage {
     public HashMap<Integer, Film> getAllFilms() {
         return films;
     }
+
+    @Override
+    public void putLike(Integer id, Integer userId) throws NotFoundException {
+
+    }
+
+    @Override
+    public void removeLike(Integer id, Integer userId) throws NotFoundException {
+
+    }
+
+    @Override
+    public List<Film> getListSortLikes(Integer count) {
+        return null;
+    }
+
+    @Override
+    public Film getFilm(Integer id) throws NotFoundException {
+        return null;
+    }
+
+    /*public void putLike(Integer id, Integer userId) {
+        getFilm(id).getLikes().add(userId);
+    }
+
+    public void removeLike(Integer id, Integer userId) {
+        getFilm(id).getLikes().remove(userId);
+    }
+
+    public Stream<Film> getListSortLikes(Integer count) {
+        List<Film> sorted = new ArrayList<>(getAllFilms().values());
+        return sorted.stream()
+                .sorted(Comparator.comparingInt(o -> ((Film) o).getLikes().size()).reversed())
+                .limit(count == 0 ? 10 : count);
+    }
+
+    public Film getFilm(Integer id) {
+        return getAllFilms().get(id);
+    }*/
 }
 
