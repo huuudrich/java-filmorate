@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.model;
 
 import jakarta.validation.constraints.*;
 import lombok.*;
+import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDate;
 import java.util.HashSet;
@@ -11,18 +12,19 @@ import java.util.Set;
 @Getter
 @Setter
 @ToString
+@FieldDefaults
 public class User {
-    private Integer id;
+    Integer id;
     @NotBlank(message = "Email пустой")
     @Email(message = "Непраивльный email")
-    private String email;
+    String email;
     @NotBlank(message = "Логин пустой")
-    private String login;
+    String login;
     @NotEmpty(message = "Имя пустое")
-    private String name;
-    private LocalDate birthday;
+    String name;
+    LocalDate birthday;
 
-    private HashSet<Integer> friends;
+    HashSet<Integer> friends;
     public User(String email, String login, String name, LocalDate birthday) {
         this.email = email;
         this.login = login;

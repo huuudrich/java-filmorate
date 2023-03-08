@@ -4,6 +4,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import lombok.*;
+import lombok.experimental.FieldDefaults;
 import ru.yandex.practicum.filmorate.annotation.DateOverBirthday;
 import ru.yandex.practicum.filmorate.model.properties.Genre;
 import ru.yandex.practicum.filmorate.model.properties.MpaRating;
@@ -12,20 +13,21 @@ import java.time.LocalDate;
 import java.util.List;
 
 @Data
+@FieldDefaults
 public class Film {
     private Integer id;
     @NotBlank(message = "Пустое имя")
-    private String name;
+    String name;
     @NotBlank(message = "Пустое описание")
     @Size(max = 200, message = "Описание больше 200 символов")
-    private String description;
+    String description;
     @DateOverBirthday
-    private LocalDate releaseDate;
+    LocalDate releaseDate;
     @Positive(message = "Отрицательное значение продолжительности")
-    private Integer duration;
-    private Integer likes;
-    private List<Genre> genre;
-    private MpaRating mpa;
+    Integer duration;
+    Integer likes;
+    List<Genre> genre;
+    MpaRating mpa;
 
     public Film() {
     }

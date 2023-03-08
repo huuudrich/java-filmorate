@@ -27,6 +27,7 @@ public class FilmController {
     FilmService filmService;
     GenreDaoImpl genreDao;
     MpaDaoImpl mpaDao;
+    private final String path = "/films";
 
     public FilmController(FilmService filmService, GenreDaoImpl genreDao, MpaDaoImpl mpaDao) {
         this.filmService = filmService;
@@ -35,41 +36,41 @@ public class FilmController {
     }
 
     @Validated
-    @PostMapping("/films")
+    @PostMapping(path)
     public Film addFilm(@Valid @RequestBody Film film) throws NotFoundException {
         setMpaAndGenreWithFilm(film);
         return filmService.addFilm(film);
     }
 
     @Validated
-    @PutMapping("/films")
+    @PutMapping(path)
     public Film refreshFilm(@Valid @RequestBody Film film) throws NotFoundException {
         setMpaAndGenreWithFilm(film);
         return filmService.refreshFilm(film);
     }
 
     @Validated
-    @GetMapping("/films")
+    @GetMapping(path)
     public List<Film> getAllFilms() {
         return new ArrayList<>(filmService.getAllFilms().values());
     }
 
-    @PutMapping("/films/{id}/like/{userId}")
+    @PutMapping(path + "/{id}/like/{userId}")
     public void putLike(@PathVariable Integer id, @PathVariable Integer userId) throws NotFoundException {
         filmService.putLike(id, userId);
     }
 
-    @DeleteMapping("/films/{id}/like/{userId}")
+    @DeleteMapping(path + "/{id}/like/{userId}")
     public void removeLike(@PathVariable Integer id, @PathVariable Integer userId) throws NotFoundException {
         filmService.removeLike(id, userId);
     }
 
-    @GetMapping("/films/popular")
+    @GetMapping(path + "/popular")
     public List<Film> getListSortLikes(@RequestParam(defaultValue = "0") Integer count) {
         return filmService.getListSortLikes(count);
     }
 
-    @GetMapping("/films/{id}")
+    @GetMapping(path + "/{id}")
     public Film getFilm(@PathVariable Integer id) throws NotFoundException {
         if (filmService.getAllFilms().size() < id)
             throw new NotFoundException("id превышает количество фильмов");
