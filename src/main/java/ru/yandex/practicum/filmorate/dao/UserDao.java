@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.storage;
+package ru.yandex.practicum.filmorate.dao;
 
 import jakarta.validation.Valid;
 import org.springframework.stereotype.Component;
@@ -10,7 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 
 @Component
-public interface UserStorage {
+public interface UserDao {
     User addUser(@Valid @RequestBody User user) throws NotFoundException;
 
     User refreshUser(@Valid @RequestBody User user) throws NotFoundException;

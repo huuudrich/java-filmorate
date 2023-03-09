@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.dao.impl;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
@@ -13,6 +14,7 @@ import ru.yandex.practicum.filmorate.model.properties.Genre;
 import java.util.List;
 @Qualifier("genreDaoImpl")
 @Component
+@Slf4j
 public class GenreDaoImpl implements GenreDao {
     private final JdbcTemplate jdbcTemplate;
 
@@ -32,7 +34,9 @@ public class GenreDaoImpl implements GenreDao {
         try {
             return jdbcTemplate.queryForObject(sql, new Object[]{id}, new BeanPropertyRowMapper<>(Genre.class));
         } catch (EmptyResultDataAccessException e) {
-            throw new NotFoundException("Genre not found with id: " + id);
+            String logMessage = "Genre not found with id: " + id;
+            log.warn(logMessage);
+            throw new NotFoundException(logMessage);
         }
     }
 }

@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.UserStorage;
+import ru.yandex.practicum.filmorate.dao.UserDao;
 
 import java.util.HashMap;
 import java.util.List;
@@ -15,10 +15,10 @@ import java.util.List;
 @Service
 @Slf4j
 @Validated
-public class UserService implements UserStorage {
-    UserStorage userDao;
+public class UserService implements UserDao {
+    private final UserDao userDao;
 
-    public UserService(@Qualifier("userDbStorage") UserStorage userDao) {
+    public UserService(@Qualifier("userDaoStorage") UserDao userDao) {
         this.userDao = userDao;
     }
     @Override

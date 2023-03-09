@@ -7,7 +7,6 @@ import ru.yandex.practicum.filmorate.model.properties.MpaRating;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,7 +34,7 @@ public class FilmRowMapper implements RowMapper<Film> {
                 genres.add(genre);
             }
         }
-        film.setGenre(genres);
+        film.setGenres(genres);
         return film;
     }
 }

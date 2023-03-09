@@ -12,16 +12,18 @@ import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.service.UserService;
+import ru.yandex.practicum.filmorate.dao.UserDao;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @RestController
 @Slf4j
 @RequestMapping("/users")
 @Validated
 public class UserController {
-    UserService userService;
+    private final UserDao userService;
 
     public UserController(UserService userService) {
         this.userService = userService;
@@ -88,7 +90,7 @@ public class UserController {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ResponseEntity<String> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
         return new ResponseEntity<>("Ошибка валидации: " +
-                e.getFieldError().getDefaultMessage(), HttpStatus.BAD_REQUEST);
+                Objects.requireNonNull(e.getFieldError()).getDefaultMessage(), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(NotFoundException.class)

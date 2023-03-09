@@ -10,7 +10,7 @@ import java.util.List;
 
 @Service
 public class MpaService implements MpaDao {
-    MpaDao mpaDao;
+    private final MpaDao mpaDao;
 
     public MpaService(@Qualifier("mpaDaoImpl") MpaDao mpaDao) {
         this.mpaDao = mpaDao;

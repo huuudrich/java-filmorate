@@ -10,7 +10,7 @@ import java.util.List;
 
 @Service
 public class GenreService implements GenreDao {
-    GenreDao genreDao;
+    private final GenreDao genreDao;
 
     public GenreService(@Qualifier("genreDaoImpl") GenreDao genreDao) {
         this.genreDao = genreDao;

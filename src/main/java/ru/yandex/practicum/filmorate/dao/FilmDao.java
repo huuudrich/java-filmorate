@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.storage;
+package ru.yandex.practicum.filmorate.dao;
 
 import jakarta.validation.Valid;
 import org.springframework.stereotype.Component;
@@ -8,9 +8,9 @@ import ru.yandex.practicum.filmorate.model.Film;
 
 import java.util.HashMap;
 import java.util.List;
-import java.util.stream.Stream;
+
 @Component
-public interface FilmStorage {
+public interface FilmDao {
     Film addFilm(@Valid @RequestBody Film film) throws NotFoundException;
 
     Film refreshFilm(@Valid @RequestBody Film film) throws NotFoundException;

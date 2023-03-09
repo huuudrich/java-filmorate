@@ -9,6 +9,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.dao.GenreDao;
+import ru.yandex.practicum.filmorate.dao.MpaDao;
 import ru.yandex.practicum.filmorate.dao.impl.GenreDaoImpl;
 import ru.yandex.practicum.filmorate.dao.impl.MpaDaoImpl;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
@@ -16,18 +17,22 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.properties.Genre;
 import ru.yandex.practicum.filmorate.model.properties.MpaRating;
 import ru.yandex.practicum.filmorate.service.FilmService;
+import ru.yandex.practicum.filmorate.dao.FilmDao;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @RestController
 @Slf4j
 public class FilmController {
 
-    FilmService filmService;
-    GenreDaoImpl genreDao;
-    MpaDaoImpl mpaDao;
-    private final String path = "/films";
+    private final FilmDao filmService;
+    private final GenreDao genreDao;
+    private final MpaDao mpaDao;
+    private static final String PATH_FILMS = "/films";
+    private static final String PATH_GENRE = "/genres";
+    private static final String PATH_MPA = "/mpa";
 
     public FilmController(FilmService filmService, GenreDaoImpl genreDao, MpaDaoImpl mpaDao) {
         this.filmService = filmService;
@@ -36,63 +41,64 @@ public class FilmController {
     }
 
     @Validated
-    @PostMapping(path)
+    @PostMapping(PATH_FILMS)
     public Film addFilm(@Valid @RequestBody Film film) throws NotFoundException {
-        setMpaAndGenreWithFilm(film);
-        return filmService.addFilm(film);
+        filmService.addFilm(film);
+        return setMpaAndGenreWithFilm(film);
+
     }
 
     @Validated
-    @PutMapping(path)
+    @PutMapping(PATH_FILMS)
     public Film refreshFilm(@Valid @RequestBody Film film) throws NotFoundException {
-        setMpaAndGenreWithFilm(film);
-        return filmService.refreshFilm(film);
+        filmService.refreshFilm(film);
+        return setMpaAndGenreWithFilm(film);
     }
 
     @Validated
-    @GetMapping(path)
+    @GetMapping(PATH_FILMS)
     public List<Film> getAllFilms() {
         return new ArrayList<>(filmService.getAllFilms().values());
     }
 
-    @PutMapping(path + "/{id}/like/{userId}")
+    @PutMapping(PATH_FILMS + "/{id}/like/{userId}")
     public void putLike(@PathVariable Integer id, @PathVariable Integer userId) throws NotFoundException {
         filmService.putLike(id, userId);
     }
 
-    @DeleteMapping(path + "/{id}/like/{userId}")
+    @DeleteMapping(PATH_FILMS + "/{id}/like/{userId}")
     public void removeLike(@PathVariable Integer id, @PathVariable Integer userId) throws NotFoundException {
         filmService.removeLike(id, userId);
     }
 
-    @GetMapping(path + "/popular")
+    @GetMapping(PATH_FILMS + "/popular")
     public List<Film> getListSortLikes(@RequestParam(defaultValue = "0") Integer count) {
         return filmService.getListSortLikes(count);
     }
 
-    @GetMapping(path + "/{id}")
+    @GetMapping(PATH_FILMS + "/{id}")
     public Film getFilm(@PathVariable Integer id) throws NotFoundException {
-        if (filmService.getAllFilms().size() < id)
+        if (!filmService.getAllFilms().containsKey(id))
             throw new NotFoundException("id превышает количество фильмов");
         return filmService.getFilm(id);
     }
 
-    @GetMapping("/genres")
+    @GetMapping(PATH_GENRE)
     public List<Genre> getAllGenres() {
         return genreDao.getAllGenres();
     }
 
-    @GetMapping("/genres/{id}")
+    @GetMapping(PATH_GENRE + "/{id}")
     public Genre getGenre(@PathVariable Integer id) throws NotFoundException {
         return genreDao.getGenre(id);
     }
 
-    @GetMapping("/mpa")
+    @GetMapping(PATH_MPA)
     public List<MpaRating> getAllMpa() {
         return mpaDao.getAllMpa();
     }
 
-    @GetMapping("/mpa/{id}")
+    @GetMapping(PATH_MPA + "/{id}")
     public MpaRating getMpa(@PathVariable Integer id) throws NotFoundException {
         return mpaDao.getMpa(id);
     }
@@ -108,7 +114,7 @@ public class FilmController {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ResponseEntity<String> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
         return new ResponseEntity<>("Ошибка валидации: " +
-                e.getFieldError().getDefaultMessage(), HttpStatus.BAD_REQUEST);
+                Objects.requireNonNull(e.getFieldError()).getDefaultMessage(), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(NotFoundException.class)
@@ -118,23 +124,22 @@ public class FilmController {
                 e.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
-    private void setMpaAndGenreWithFilm(Film film) throws NotFoundException {
-        List<Genre> filmGenres = film.getGenre();
-        List<Genre> newGenres = new ArrayList<>();
-        MpaRating filmMpa;
-        try {
-            for (Genre genre : filmGenres) {
-                newGenres.add(genreDao.getGenre(genre.getId()));
+    private Film setMpaAndGenreWithFilm(Film film) throws NotFoundException {
+        List<Genre> genresNew = new ArrayList<>();
+        if (film.getGenres() != null) {
+            for (Genre genre : film.getGenres()) {
+                genresNew.add(getGenre(genre.getId()));
+                film.setGenres(genresNew);
             }
-            film.setGenre(newGenres);
-        } catch (NullPointerException e) {
-            film.setGenre(null);
+        } else {
+            film.setGenres(null);
         }
-        try {
-            filmMpa = mpaDao.getMpa(film.getMpa().getId());
-            film.setMpa(filmMpa);
-        } catch (NullPointerException e) {
+        if (film.getMpa() != null) {
+            MpaRating mpa = getMpa(film.getMpa().getId());
+            film.setMpa(mpa);
+        } else {
             film.setMpa(null);
         }
+        return film;
     }
 }

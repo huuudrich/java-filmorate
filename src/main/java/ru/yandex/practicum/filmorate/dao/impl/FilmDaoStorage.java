@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.dao.impl;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
@@ -9,22 +10,27 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.storage.FilmStorage;
+import ru.yandex.practicum.filmorate.dao.FilmDao;
+import ru.yandex.practicum.filmorate.model.properties.Genre;
+import ru.yandex.practicum.filmorate.model.properties.MpaRating;
 import ru.yandex.practicum.filmorate.util.FilmRowMapper;
 
 import java.sql.PreparedStatement;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Component
-public class FilmDbStorage implements FilmStorage {
+@Slf4j
+public class FilmDaoStorage implements FilmDao {
 
     private final JdbcTemplate jdbcTemplate;
 
     @Autowired
-    public FilmDbStorage(JdbcTemplate jdbcTemplate) {
+    public FilmDaoStorage(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
 
@@ -32,15 +38,15 @@ public class FilmDbStorage implements FilmStorage {
     public Film addFilm(Film film) throws NotFoundException {
         String sql = "INSERT INTO Films (name, description, release_date, duration, likes) " +
                 "VALUES (?, ?, ?, ?, ?)";
-        //int rowsAffected = jdbcTemplate.update(sql, film.getName(), film.getDescription(), film.getDuration(), film.getLikes());
         int id = getIdAndUpdateFilm(sql, film);
         if (id != 0) {
             film.setId(id);
             return film;
         } else {
-            throw new NotFoundException("Failed to add film to database");
+            String logMessage = "Failed to add film to database" + film;
+            log.warn(logMessage);
+            throw new NotFoundException(logMessage);
         }
-
     }
 
     @Override
@@ -58,7 +64,9 @@ public class FilmDbStorage implements FilmStorage {
         if (numRowsAffected == 1) {
             return film;
         } else {
-            throw new NotFoundException("Failed to update film in database");
+            String logMessage = "Failed to update film in database: " + film;
+            log.warn(logMessage);
+            throw new NotFoundException(logMessage);
         }
     }
 
@@ -82,7 +90,9 @@ public class FilmDbStorage implements FilmStorage {
         Film film = getFilm(id);
         int rowsAffected = jdbcTemplate.update(sql, userId, id);
         if (rowsAffected == 0) {
-            throw new NotFoundException("Failed to put like in database");
+            String logMessage = "Failed to put like in database" + film;
+            log.warn(logMessage);
+            throw new NotFoundException(logMessage);
         }
         film.setLikes(film.getLikes() + 1);
         refreshFilm(film);
@@ -94,22 +104,25 @@ public class FilmDbStorage implements FilmStorage {
         getFilm(id).setLikes(getFilm(id).getLikes() - 1);
         int rowsAffected = jdbcTemplate.update(sql, userId, id);
         if (rowsAffected == 0) {
-            throw new NotFoundException("Failed to remove like from database");
+            String logMessage = "Failed to remove like from database";
+            log.warn(logMessage);
+            throw new NotFoundException(logMessage);
         }
     }
 
     @Override
     public List<Film> getListSortLikes(Integer count) {
-        String sql = "SELECT *" +
+        String sql = "SELECT * " +
                 "FROM Films " +
                 "GROUP BY id " +
                 "ORDER BY likes DESC ";
         if (count == 0) {
             sql = sql + "LIMIT 10";
+            return jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(Film.class));
         } else {
             sql = sql + "LIMIT ?";
         }
-        return jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(Film.class));
+        return jdbcTemplate.query(sql, new Object[]{count}, new BeanPropertyRowMapper<>(Film.class));
     }
 
     @Override
@@ -125,7 +138,9 @@ public class FilmDbStorage implements FilmStorage {
         try {
             return jdbcTemplate.queryForObject(sql, new Object[]{id}, new FilmRowMapper());
         } catch (EmptyResultDataAccessException e) {
-            throw new NotFoundException("Film not found");
+            String logMessage = "Film not found with id: " + id;
+            log.warn(logMessage);
+            throw new NotFoundException(logMessage);
         }
     }
 
@@ -146,6 +161,6 @@ public class FilmDbStorage implements FilmStorage {
             }
             return ps;
         }, keyHolder);
-        return keyHolder.getKey().intValue();
+        return Objects.requireNonNull(keyHolder.getKey()).intValue();
     }
 }

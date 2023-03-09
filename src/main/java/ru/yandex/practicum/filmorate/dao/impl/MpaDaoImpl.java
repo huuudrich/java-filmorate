@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.dao.impl;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
@@ -13,6 +14,7 @@ import ru.yandex.practicum.filmorate.model.properties.MpaRating;
 import java.util.List;
 @Qualifier("mpaDaoImpl")
 @Component
+@Slf4j
 public class MpaDaoImpl implements MpaDao {
     JdbcTemplate jdbcTemplate;
 
@@ -28,11 +30,13 @@ public class MpaDaoImpl implements MpaDao {
 
     @Override
     public MpaRating getMpa(Integer id) throws NotFoundException {
-        String sql = "SELECT id,name FROM Mpa WHERE id = ?";
+        String sql = "SELECT id, name FROM Mpa WHERE id = ?";
         try {
             return jdbcTemplate.queryForObject(sql, new Object[]{id}, new BeanPropertyRowMapper<>(MpaRating.class));
         } catch (EmptyResultDataAccessException e) {
-            throw new NotFoundException("Mpa not found with id: " + id);
+            String logMessage = "Mpa not found with id: " + id;
+            log.warn(logMessage);
+            throw new NotFoundException(logMessage);
         }
     }
 }
