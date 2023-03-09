@@ -5,7 +5,11 @@ import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
+import java.util.stream.Stream;
 
 @Repository
 @Slf4j
@@ -33,8 +37,29 @@ public class InMemoryFilmStorage implements FilmStorage {
         }
     }
 
+    @Override
     public HashMap<Integer, Film> getAllFilms() {
-        return films;
+        return null;
+    }
+
+    @Override
+    public void putLike(Integer id, Integer userId) throws NotFoundException {
+
+    }
+
+    @Override
+    public void removeLike(Integer id, Integer userId) throws NotFoundException {
+
+    }
+
+    @Override
+    public List<Film> getListSortLikes(Integer count) {
+        return null;
+    }
+
+    @Override
+    public Film getFilm(Integer id) throws NotFoundException {
+        return null;
     }
 }
 

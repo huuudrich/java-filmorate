@@ -12,7 +12,6 @@ import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.service.UserService;
-import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,36 +21,38 @@ import java.util.List;
 @RequestMapping("/users")
 @Validated
 public class UserController {
-    InMemoryUserStorage inMemoryUserStorage = new InMemoryUserStorage();
-    UserService userService = new UserService(inMemoryUserStorage);
+    UserService userService;
 
+    public UserController(UserService userService) {
+        this.userService = userService;
+    }
     @PostMapping
     public User addUser(@Valid @RequestBody User user) throws NotFoundException {
-        return inMemoryUserStorage.addUser(user);
+        return userService.addUser(user);
     }
 
     @PutMapping
     public User refreshUser(@Valid @RequestBody User user) throws NotFoundException {
-        return inMemoryUserStorage.refreshUser(user);
+        return userService.refreshUser(user);
     }
 
     @Validated
     @GetMapping
     public List<User> getAllUsers() {
-        return new ArrayList<>(inMemoryUserStorage.getAllUsers().values());
+        return new ArrayList<>(userService.getAllUsers().values());
     }
 
     @Validated
     @PutMapping("{id}/friends/{friendId}")
     public void addFriends(@PathVariable("id") @Positive int id,
-                           @PathVariable("friendId") @Positive int friendId) {
+                           @PathVariable("friendId") @Positive int friendId) throws NotFoundException {
         userService.addFriends(id, friendId);
     }
 
     @Validated
     @DeleteMapping("{id}/friends/{friendId}")
     public void removeFriends(@PathVariable @Positive int id,
-                              @PathVariable @Positive int friendId) {
+                              @PathVariable @Positive int friendId) throws NotFoundException {
         userService.removeFriends(id, friendId);
     }
 
@@ -71,7 +72,7 @@ public class UserController {
     @Validated
     @GetMapping("{id}")
     public User getUser(@PathVariable("id") @Positive Integer id) throws NotFoundException {
-        if (inMemoryUserStorage.getAllUsers().size() < id)
+        if (userService.getAllUsers().size() < id)
             throw new NotFoundException("Id превышает количество пользователей");
         return userService.getUser(id);
     }
