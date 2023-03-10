@@ -43,16 +43,14 @@ public class FilmController {
     @Validated
     @PostMapping(PATH_FILMS)
     public Film addFilm(@Valid @RequestBody Film film) throws NotFoundException {
-        filmService.addFilm(film);
-        return setMpaAndGenreWithFilm(film);
+        return filmService.addFilm(film);
 
     }
 
     @Validated
     @PutMapping(PATH_FILMS)
     public Film refreshFilm(@Valid @RequestBody Film film) throws NotFoundException {
-        filmService.refreshFilm(film);
-        return setMpaAndGenreWithFilm(film);
+        return filmService.refreshFilm(film);
     }
 
     @Validated
@@ -122,24 +120,5 @@ public class FilmController {
     public ResponseEntity<String> handleValidationException(NotFoundException e) {
         return new ResponseEntity<>("NotFound Exception: " +
                 e.getMessage(), HttpStatus.BAD_REQUEST);
-    }
-
-    private Film setMpaAndGenreWithFilm(Film film) throws NotFoundException {
-        List<Genre> genresNew = new ArrayList<>();
-        if (film.getGenres() != null) {
-            for (Genre genre : film.getGenres()) {
-                genresNew.add(getGenre(genre.getId()));
-                film.setGenres(genresNew);
-            }
-        } else {
-            film.setGenres(null);
-        }
-        if (film.getMpa() != null) {
-            MpaRating mpa = getMpa(film.getMpa().getId());
-            film.setMpa(mpa);
-        } else {
-            film.setMpa(null);
-        }
-        return film;
     }
 }

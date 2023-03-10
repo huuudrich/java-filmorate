@@ -31,8 +31,8 @@ CREATE TABLE IF NOT EXISTS Films
 
 CREATE TABLE IF NOT EXISTS Film_Mpa
 (
-    film_id  INTEGER NOT NULL,
-    mpa_id INTEGER NOT NULL,
+    film_id INTEGER NOT NULL,
+    mpa_id  INTEGER NOT NULL,
     PRIMARY KEY (film_id, mpa_id),
     FOREIGN KEY (film_id) REFERENCES Films (id),
     FOREIGN KEY (mpa_id) REFERENCES Mpa (id)

@@ -2,6 +2,9 @@ package ru.yandex.practicum.filmorate;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.assertj.core.api.Assert;
+import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -34,11 +37,32 @@ class FilmorateApplicationTests {
     private final FilmDaoStorage filmDao;
     private List<User> users = new ArrayList<>();
 
-    @Test
-    void createUserTest() throws NotFoundException {
-        User userOne = new User()
-                User userTwo
-                        User userThree
+    @BeforeClass
+    public static void createUserTest() throws NotFoundException {
+        User userOne = User.builder()
+                .login("Kel").name("Alex")
+                .birthday(LocalDate.of(2000, 10, 10))
+                .email("polupoker@mail.ru")
+                .friends(null).build();
+        userDao.addUser(userOne);
+        users.add(userOne);
+
+        User userTwo = User.builder().id(1)
+                .login("Peter").name("John")
+                .birthday(LocalDate.of(1989, 3, 20))
+                .email("john@yandex.ru")
+                .friends(null).build();
+        userDao.addUser(userTwo);
+        users.add(userTwo);
+
+        User userThree = User.builder()
+                .login("Friend").name("Newest")
+                .birthday(LocalDate.of(1960, 4, 14))
+                .email("friend@gmail.com")
+                .friends(null).build();
+        userDao.addUser(userThree);
+        users.add(userThree);
+
         Optional<User> userOptional = Optional.ofNullable(userDao.getUser(1));
 
         assertThat(userOptional)
@@ -50,10 +74,23 @@ class FilmorateApplicationTests {
 
     @Test
     void updateUserTest() throws NotFoundException {
+        Optional<User> userOptional = Optional.ofNullable(userDao.refreshUser(users.get(1)));
+
+        assertThat(userOptional)
+                .isPresent()
+                .hasValueSatisfying(user ->
+                        assertThat(user).hasFieldOrPropertyWithValue("name", "John")
+                );
     }
 
     @Test
     void testGetAllUsers() {
+        int size = userDao.getAllUsers().size();
+        if (size != 0) {
+            Assertions.assertEquals(size, users.size());
+        } else {
+            Assertions.fail("Список всех пользователей = 0");
+        }
     }
 
     @Test

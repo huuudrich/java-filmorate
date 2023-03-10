@@ -14,13 +14,11 @@ import ru.yandex.practicum.filmorate.dao.FilmDao;
 import ru.yandex.practicum.filmorate.model.properties.Genre;
 import ru.yandex.practicum.filmorate.model.properties.MpaRating;
 import ru.yandex.practicum.filmorate.util.FilmRowMapper;
+import ru.yandex.practicum.filmorate.util.MpaRowMapper;
 
 import java.sql.PreparedStatement;
 import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
@@ -39,8 +37,18 @@ public class FilmDaoStorage implements FilmDao {
         String sql = "INSERT INTO Films (name, description, release_date, duration, likes) " +
                 "VALUES (?, ?, ?, ?, ?)";
         int id = getIdAndUpdateFilm(sql, film);
+        Optional<MpaRating> mpa = Optional.ofNullable(film.getMpa());
+        Optional<List<Genre>> genres = Optional.ofNullable(film.getGenres());
+        List<Integer> genreIds = new ArrayList<>();
         if (id != 0) {
             film.setId(id);
+            mpa.ifPresent(mpaRating -> film.setMpa(setMpaFromSql(id, mpaRating.getId())));
+            if (genres.isPresent()) {
+                for (Genre genre : genres.get()) {
+                    genreIds.add(genre.getId());
+                }
+                film.setGenres(setGenreFromSql(id, genreIds));
+            }
             return film;
         } else {
             String logMessage = "Failed to add film to database" + film;
@@ -48,6 +56,7 @@ public class FilmDaoStorage implements FilmDao {
             throw new NotFoundException(logMessage);
         }
     }
+
 
     @Override
     public Film refreshFilm(Film film) throws NotFoundException {
@@ -78,7 +87,7 @@ public class FilmDaoStorage implements FilmDao {
                 "LEFT JOIN Mpa m ON fm.mpa_id = m.id " +
                 "LEFT JOIN Film_Genre fg ON f.id = fg.film_id " +
                 "LEFT JOIN Genres g ON fg.genre_id = g.id " +
-                "GROUP BY f.id";
+                "GROUP BY f.id, m.name";
         List<Film> films = jdbcTemplate.query(sql, new FilmRowMapper());
         return films.stream()
                 .collect(Collectors.toMap(Film::getId, film -> film, (a, b) -> b, HashMap::new));
@@ -162,5 +171,30 @@ public class FilmDaoStorage implements FilmDao {
             return ps;
         }, keyHolder);
         return Objects.requireNonNull(keyHolder.getKey()).intValue();
+    }
+
+    private MpaRating setMpaFromSql(Integer id, Integer mpaId) {
+        String intoMpaSql = "INSERT INTO Film_Mpa (film_id,mpa_id)" +
+                "VALUES(?,?)";
+        jdbcTemplate.update(intoMpaSql, id, mpaId);
+        String mpaSql = "SELECT m.* FROM Mpa m " +
+                "JOIN Film_Mpa fm ON fm.mpa_id = m.id " +
+                "WHERE fm.film_id = ? AND fm.mpa_id = ?";
+        MpaRating mpa = jdbcTemplate.queryForObject(mpaSql, new Object[]{id, mpaId}, new MpaRowMapper());
+        return mpa;
+    }
+
+    private List<Genre> setGenreFromSql(Integer id, List<Integer> idGenres) {
+        String intoGenreSql = "INSERT INTO Film_Genre (film_id, genre_id) VALUES (?, ?)";
+
+        String genreSql = "SELECT g.* FROM Genres g " +
+                "JOIN Film_Genre fg ON fg.genre_id = g.id " +
+                "WHERE fg.film_id = ? AND fg.genre_id = ?";
+        List<Genre> genres = new ArrayList<>();
+        for (Integer genreId : idGenres) {
+            jdbcTemplate.update(intoGenreSql, id, genreId);
+            genres = jdbcTemplate.query(genreSql, new Object[]{id, genreId}, new BeanPropertyRowMapper<>(Genre.class));
+        }
+        return genres;
     }
 }

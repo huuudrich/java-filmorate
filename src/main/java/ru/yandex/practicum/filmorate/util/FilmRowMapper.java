@@ -30,6 +30,7 @@ public class FilmRowMapper implements RowMapper<Film> {
             String[] genreNames = genresStr.split(", ");
             for (String genreName : genreNames) {
                 Genre genre = new Genre();
+                genre.setId(rs.getInt("id"));
                 genre.setName(genreName);
                 genres.add(genre);
             }
